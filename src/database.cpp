@@ -52,24 +52,6 @@ void initializeDatabase() {
             sqlite3_free(errMessage);
         }
 
-        // Drop and create user_permissions junction table
-        const char *dropUserPermissionsTableSQL = "DROP TABLE IF EXISTS user_permissions;";
-        if (sqlite3_exec(db, dropUserPermissionsTableSQL, nullptr, nullptr, &errMessage) != SQLITE_OK) {
-            std::cerr << "SQL error (drop user_permissions table): " << errMessage << std::endl;
-            sqlite3_free(errMessage);
-        }
-
-        const char *createUserPermissionsTableSQL = "CREATE TABLE IF NOT EXISTS user_permissions ("
-                "user_id INTEGER, "
-                "permission_id INTEGER, "
-                "FOREIGN KEY(user_id) REFERENCES users(id), "
-                "FOREIGN KEY(permission_id) REFERENCES permissions(id), "
-                "PRIMARY KEY(user_id, permission_id));";
-        if (sqlite3_exec(db, createUserPermissionsTableSQL, nullptr, nullptr, &errMessage) != SQLITE_OK) {
-            std::cerr << "SQL error (create user_permissions table): " << errMessage << std::endl;
-            sqlite3_free(errMessage);
-        }
-
         closeDatabase(db);
     }
 }
