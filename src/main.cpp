@@ -67,15 +67,15 @@ std::string apiHandler(const std::string& path, const std::unordered_map<std::st
         return jsonResponse.str();
     }
     if (path == "/permissions") {
-        if (params.find("name") != params.end() && params.find("permission_id") != params.end()) {
+        if (params.find("name") != params.end() && params.find("role_id") != params.end()) {
             try {
-                int permissionId = std::stoi(params.at("permission_id"));  // Convert string to int
-                createPermission(db, params.at("name"), permissionId);
+                int roleId = std::stoi(params.at("role_id"));  // Convert string to int
+                createPermission(db, params.at("name"), roleId);
                 closeDatabase(db);
                 return R"({"status": "Permission created"})";
             } catch (const std::exception& e) {
                 closeDatabase(db);
-                return R"({"error": "Invalid permission_id"})";
+                return R"({"error": "Invalid role_id"})";
             }
         }
         // Get permissions
