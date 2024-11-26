@@ -16,7 +16,6 @@ add_executable(rest_api_cpp
         src/user.cpp
         src/role.cpp
         src/permission.cpp
-        src/http_server.cpp
         src/sqlite3.c
 )
 
