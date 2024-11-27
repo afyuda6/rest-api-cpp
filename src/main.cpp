@@ -28,7 +28,7 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
     sqlite3 *db = openDatabase("rest_api_cpp.db");
     if (!db) {
         std::string response =
-                "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\nDatabase connection failed!";
+                "HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Internal Server Error\", \"code\":500}";
         send(clientSocket, response.c_str(), response.length(), 0);
         return;
     }
