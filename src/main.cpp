@@ -165,12 +165,9 @@ void startHttpServer(int port) {
     }
 
     listen(serverSocket, 3);
-    std::cout << "Waiting for incoming connections..." << std::endl;
 
     c = sizeof(struct sockaddr_in);
     while ((clientSocket = accept(serverSocket, (struct sockaddr *) &client, &c)) != INVALID_SOCKET) {
-        std::cout << "Connection accepted!" << std::endl;
-
         read_size = recv(clientSocket, buffer, sizeof(buffer), 0);
         if (read_size > 0) {
             buffer[read_size] = '\0';
