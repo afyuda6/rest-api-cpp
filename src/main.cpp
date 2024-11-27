@@ -43,7 +43,7 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
 
             std::ostringstream responseStream;
             responseStream <<
-                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\",\"code\":200,\"data\":{[";
+                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\",\"code\":200,\"data\":[";
             bool first = true;
             while (sqlite3_step(stmt) == SQLITE_ROW) {
                 if (!first) {
@@ -53,7 +53,7 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
                 responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0)
                         << ", \"name\": \"" << sqlite3_column_text(stmt, 1) << "\"}";
             }
-            responseStream << "]}}";
+            responseStream << "]}";
             sqlite3_finalize(stmt);
 
             std::string response = responseStream.str();
