@@ -64,7 +64,8 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
             send(clientSocket, response.c_str(), response.length(), 0);
         }
     } else if (request.find("POST") == 0) {
-        if (request.find("/users") != std::string::npos) {
+        size_t usersPos = request.find("/users");
+        if (request[usersPos + 6] == ' ' || request[usersPos + 6] == '?' || request[usersPos + 6] == '/') {
             std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
             parseFormData(body, params);
@@ -86,7 +87,8 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
             send(clientSocket, response.c_str(), response.length(), 0);
         }
     } else if (request.find("PUT") == 0) {
-        if (request.find("/users") != std::string::npos) {
+        size_t usersPos = request.find("/users");
+        if (request[usersPos + 6] == ' ' || request[usersPos + 6] == '?' || request[usersPos + 6] == '/') {
             std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
             parseFormData(body, params);
@@ -109,7 +111,8 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
             send(clientSocket, response.c_str(), response.length(), 0);
         }
     } else if (request.find("DELETE") == 0) {
-        if (request.find("/users") != std::string::npos) {
+        size_t usersPos = request.find("/users");
+        if (request[usersPos + 6] == ' ' || request[usersPos + 6] == '?' || request[usersPos + 6] == '/') {
             std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
             parseFormData(body, params);
