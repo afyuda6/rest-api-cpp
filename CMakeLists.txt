@@ -11,9 +11,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Add source files
 add_executable(rest-api-cpp
         src/main.cpp
-        src/sqlite_wrapper.cpp
-        src/database.cpp
+        database/database.cpp
         src/sqlite3.c
+        handlers/user.cpp
 )
 
 # Link the Winsock2 library

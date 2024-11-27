@@ -1,8 +1,12 @@
 #include <iostream>
-#include "sqlite_wrapper.h"
+#include <sqlite3.h>
 
 void initializeDatabase() {
-    sqlite3 *db = openDatabase("rest_api_cpp.db");
+    sqlite3* db;
+    if (sqlite3_open("rest_api_cpp.db", &db)) {
+        std::cerr << "SQL error (open database): " << sqlite3_errmsg(db) << std::endl;
+    }
+
     if (db) {
         char *errMessage = nullptr;
 
@@ -20,6 +24,6 @@ void initializeDatabase() {
             sqlite3_free(errMessage);
         }
 
-        closeDatabase(db);
+        sqlite3_close(db);
     }
 }
