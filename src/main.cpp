@@ -78,7 +78,7 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
                 send(clientSocket, response.c_str(), response.length(), 0);
             } else {
                 std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'name' or 'roleId' parameter\"]}";
+                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'name' parameter\"]}";
                 send(clientSocket, response.c_str(), response.length(), 0);
             }
         } else {
@@ -102,7 +102,7 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
                 send(clientSocket, response.c_str(), response.length(), 0);
             } else {
                 std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id', 'name' or 'roleId' parameter\"]}";
+                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id' or 'name' parameter\"]}";
                 send(clientSocket, response.c_str(), response.length(), 0);
             }
         } else {
