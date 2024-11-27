@@ -38,7 +38,7 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
             sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
 
             std::ostringstream responseStream;
-            responseStream << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n[";
+            responseStream << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\",\"code\":200,\"data\":{[";
             bool first = true;
             while (sqlite3_step(stmt) == SQLITE_ROW) {
                 if (!first) {
@@ -48,7 +48,7 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
                 responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0)
                                << ", \"name\": \"" << sqlite3_column_text(stmt, 1) << "\"}";
             }
-            responseStream << "]";
+            responseStream << "]}}";
             sqlite3_finalize(stmt);
 
             std::string response = responseStream.str();
@@ -60,7 +60,7 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
             sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
 
             std::ostringstream responseStream;
-            responseStream << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n[";
+            responseStream << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\",\"code\":200,\"data\":{[";
             bool first = true;
             while (sqlite3_step(stmt) == SQLITE_ROW) {
                 if (!first) {
@@ -70,7 +70,7 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
                 responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0)
                                << ", \"name\": \"" << sqlite3_column_text(stmt, 1) << "\"}";
             }
-            responseStream << "]";
+            responseStream << "]}}";
             sqlite3_finalize(stmt);
 
             std::string response = responseStream.str();
@@ -82,7 +82,7 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
             sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
 
             std::ostringstream responseStream;
-            responseStream << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n[";
+            responseStream << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\",\"code\":200,\"data\":{[";
             bool first = true;
             while (sqlite3_step(stmt) == SQLITE_ROW) {
                 if (!first) {
@@ -92,22 +92,22 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
                 responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0)
                                << ", \"name\": \"" << sqlite3_column_text(stmt, 1) << "\"}";
             }
-            responseStream << "]";
+            responseStream << "]}}";
             sqlite3_finalize(stmt);
 
             std::string response = responseStream.str();
             send(clientSocket, response.c_str(), response.length(), 0);
         }
         else {
-            std::string response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nInvalid endpoint!";
+            std::string response = "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Not Found\", \"code\":404}";
             send(clientSocket, response.c_str(), response.length(), 0);
         }
     }
     else if (request.find("POST") == 0) {
         if (request.find("/users") != std::string::npos) {
-            std::string body = request.substr(request.find("\r\n\r\n") + 4);  // Extract the POST body
+            std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
-            parseFormData(body, params);  // Parse the form data from the POST body
+            parseFormData(body, params);
 
             if (params.find("name") != params.end()) {
                 std::string name = params.at("name");
@@ -121,7 +121,6 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
                 send(clientSocket, response.c_str(), response.length(), 0);
             }
         } else if (request.find("/roles") != std::string::npos) {
-            // Similar logic for roles
             std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
             parseFormData(body, params);
@@ -136,7 +135,6 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
                 send(clientSocket, response.c_str(), response.length(), 0);
             }
         } else if (request.find("/permissions") != std::string::npos) {
-            // Similar logic for permissions
             std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
             parseFormData(body, params);
@@ -153,9 +151,7 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
         }
     }
     else if (request.find("PUT") == 0) {
-        // Handle PUT request - update users, roles, or permissions
         if (request.find("/users") != std::string::npos) {
-            // Update user logic (updating the database)
             std::string id = params.at("id");
             std::string name = params.at("name");
             std::string sql = "UPDATE users SET name = '" + name + "' WHERE id = " + id + ";";
@@ -165,9 +161,7 @@ void handleRequest(const std::string& request, const std::unordered_map<std::str
         }
     }
     else if (request.find("DELETE") == 0) {
-        // Handle DELETE request - delete users, roles, or permissions
         if (request.find("/users") != std::string::npos) {
-            // Delete user logic (deleting from the database)
             std::string id = params.at("id");
             std::string sql = "DELETE FROM users WHERE id = " + id + ";";
             sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);

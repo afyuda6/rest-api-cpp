@@ -4,7 +4,6 @@
 void initializeDatabase() {
     sqlite3 *db = openDatabase("rest_api_cpp.db");
     if (db) {
-        // Drop tables if they exist and recreate them
         const char *dropRolesTableSQL = "DROP TABLE IF EXISTS roles;";
         char *errMessage = nullptr;
         if (sqlite3_exec(db, dropRolesTableSQL, nullptr, nullptr, &errMessage) != SQLITE_OK) {
@@ -18,7 +17,6 @@ void initializeDatabase() {
             sqlite3_free(errMessage);
         }
 
-        // Drop and create users table
         const char *dropUsersTableSQL = "DROP TABLE IF EXISTS users;";
         if (sqlite3_exec(db, dropUsersTableSQL, nullptr, nullptr, &errMessage) != SQLITE_OK) {
             std::cerr << "SQL error (drop users table): " << errMessage << std::endl;
@@ -35,7 +33,6 @@ void initializeDatabase() {
             sqlite3_free(errMessage);
         }
 
-        // Drop and create permissions table
         const char *dropPermissionsTableSQL = "DROP TABLE IF EXISTS permissions;";
         if (sqlite3_exec(db, dropPermissionsTableSQL, nullptr, nullptr, &errMessage) != SQLITE_OK) {
             std::cerr << "SQL error (drop permissions table): " << errMessage << std::endl;
