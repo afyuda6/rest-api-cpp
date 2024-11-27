@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.29)
-project(rest_api_cpp)
+project(rest-api-cpp)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Add source files
-add_executable(rest_api_cpp
+add_executable(rest-api-cpp
         src/main.cpp
         src/sqlite_wrapper.cpp
         src/database.cpp
@@ -17,4 +17,4 @@ add_executable(rest_api_cpp
 )
 
 # Link the Winsock2 library
-target_link_libraries(rest_api_cpp Ws2_32)
+target_link_libraries(rest-api-cpp Ws2_32)
