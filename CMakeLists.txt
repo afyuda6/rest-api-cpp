@@ -13,9 +13,6 @@ add_executable(rest_api_cpp
         src/main.cpp
         src/sqlite_wrapper.cpp
         src/database.cpp
-        src/user.cpp
-        src/role.cpp
-        src/permission.cpp
         src/sqlite3.c
 )
 

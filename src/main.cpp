@@ -34,31 +34,9 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
     }
 
     if (request.find("GET") == 0) {
-        if (request.find("/users") != std::string::npos) {
-            std::string query = "SELECT id, name, role_id FROM users;";
-            sqlite3_stmt *stmt;
-            sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
-
-            std::ostringstream responseStream;
-            responseStream <<
-                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\",\"code\":200,\"data\":{[";
-            bool first = true;
-            while (sqlite3_step(stmt) == SQLITE_ROW) {
-                if (!first) {
-                    responseStream << ",";
-                }
-                first = false;
-                responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0)
-                        << ", \"name\": \"" << sqlite3_column_text(stmt, 1)
-                        << "\", \"role_id\": " << sqlite3_column_int(stmt, 2) << "}";
-            }
-            responseStream << "]}}";
-            sqlite3_finalize(stmt);
-
-            std::string response = responseStream.str();
-            send(clientSocket, response.c_str(), response.length(), 0);
-        } else if (request.find("/roles") != std::string::npos) {
-            std::string query = "SELECT id, name FROM roles;";
+        size_t usersPos = request.find("/users");
+        if (request[usersPos + 6] == ' ' || request[usersPos + 6] == '?' || request[usersPos + 6] == '/') {
+            std::string query = "SELECT id, name FROM users;";
             sqlite3_stmt *stmt;
             sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
 
@@ -79,29 +57,6 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
 
             std::string response = responseStream.str();
             send(clientSocket, response.c_str(), response.length(), 0);
-        } else if (request.find("/permissions") != std::string::npos) {
-            std::string query = "SELECT id, name, role_id FROM permissions;";
-            sqlite3_stmt *stmt;
-            sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
-
-            std::ostringstream responseStream;
-            responseStream <<
-                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\",\"code\":200,\"data\":{[";
-            bool first = true;
-            while (sqlite3_step(stmt) == SQLITE_ROW) {
-                if (!first) {
-                    responseStream << ",";
-                }
-                first = false;
-                responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0)
-                        << ", \"name\": \"" << sqlite3_column_text(stmt, 1)
-                        << "\", \"role_id\": " << sqlite3_column_int(stmt, 2) << "}";
-            }
-            responseStream << "]}}";
-            sqlite3_finalize(stmt);
-
-            std::string response = responseStream.str();
-            send(clientSocket, response.c_str(), response.length(), 0);
         } else {
             std::string response =
                     "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Not Found\", \"code\":404}";
@@ -112,43 +67,9 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
             std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
             parseFormData(body, params);
-            if (params.find("name") != params.end() && params.find("roleId") != params.end()) {
-                std::string name = params.at("name");
-                std::string roleId = params.at("roleId");
-                std::string sql = "INSERT INTO users (name, role_id) VALUES ('" + name + "', '" + roleId + "');";
-                sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
-                std::string response =
-                        "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Created\", \"code\":201}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            } else {
-                std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'name' or 'roleId' parameter\"]}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            }
-        } else if (request.find("/roles") != std::string::npos) {
-            std::string body = request.substr(request.find("\r\n\r\n") + 4);
-            std::unordered_map<std::string, std::string> params;
-            parseFormData(body, params);
             if (params.find("name") != params.end()) {
                 std::string name = params.at("name");
-                std::string sql = "INSERT INTO roles (name) VALUES ('" + name + "');";
-                sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
-                std::string response =
-                        "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Created\", \"code\":201}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            } else {
-                std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'name' parameter\"]}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            }
-        } else if (request.find("/permissions") != std::string::npos) {
-            std::string body = request.substr(request.find("\r\n\r\n") + 4);
-            std::unordered_map<std::string, std::string> params;
-            parseFormData(body, params);
-            if (params.find("name") != params.end() && params.find("roleId") != params.end()) {
-                std::string name = params.at("name");
-                std::string roleId = params.at("roleId");
-                std::string sql = "INSERT INTO permissions (name, role_id) VALUES ('" + name + "', '" + roleId + "');";
+                std::string sql = "INSERT INTO users (name) VALUES ('" + name + "');";
                 sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
                 std::string response =
                         "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Created\", \"code\":201}";
@@ -158,56 +79,20 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
                         "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'name' or 'roleId' parameter\"]}";
                 send(clientSocket, response.c_str(), response.length(), 0);
             }
+        } else {
+            std::string response =
+                    "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Not Found\", \"code\":404}";
+            send(clientSocket, response.c_str(), response.length(), 0);
         }
     } else if (request.find("PUT") == 0) {
         if (request.find("/users") != std::string::npos) {
             std::string body = request.substr(request.find("\r\n\r\n") + 4);
             std::unordered_map<std::string, std::string> params;
             parseFormData(body, params);
-            if (params.find("id") != params.end() && params.find("name") != params.end() && params.find("roleId") !=
-                params.end()) {
-                std::string id = params.at("id");
-                std::string name = params.at("name");
-                std::string roleId = params.at("roleId");
-                std::string sql = "UPDATE users SET name = '" + name + "', role_id = '" + roleId + "' WHERE id = " + id
-                                  + ";";
-                sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
-                std::string response =
-                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\", \"code\":200}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            } else {
-                std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id', 'name' or 'roleId' parameter\"]}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            }
-        } else if (request.find("/roles") != std::string::npos) {
-            std::string body = request.substr(request.find("\r\n\r\n") + 4);
-            std::unordered_map<std::string, std::string> params;
-            parseFormData(body, params);
             if (params.find("id") != params.end() && params.find("name") != params.end()) {
                 std::string id = params.at("id");
                 std::string name = params.at("name");
-                std::string sql = "UPDATE roles SET name = '" + name + "' WHERE id = " + id + ";";
-                sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
-                std::string response =
-                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\", \"code\":200}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            } else {
-                std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id' or 'name' parameter\"]}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            }
-        } else if (request.find("/permissions") != std::string::npos) {
-            std::string body = request.substr(request.find("\r\n\r\n") + 4);
-            std::unordered_map<std::string, std::string> params;
-            parseFormData(body, params);
-            if (params.find("id") != params.end() && params.find("name") != params.end() && params.find("roleId") !=
-                params.end()) {
-                std::string id = params.at("id");
-                std::string name = params.at("name");
-                std::string roleId = params.at("roleId");
-                std::string sql = "UPDATE permissions SET name = '" + name + "', role_id = '" + roleId + "' WHERE id = "
-                                  + id + ";";
+                std::string sql = "UPDATE users SET name = '" + name + "' WHERE id = " + id + ";";
                 sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
                 std::string response =
                         "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\", \"code\":200}";
@@ -217,6 +102,10 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
                         "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id', 'name' or 'roleId' parameter\"]}";
                 send(clientSocket, response.c_str(), response.length(), 0);
             }
+        } else {
+            std::string response =
+                    "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Not Found\", \"code\":404}";
+            send(clientSocket, response.c_str(), response.length(), 0);
         }
     } else if (request.find("DELETE") == 0) {
         if (request.find("/users") != std::string::npos) {
@@ -227,46 +116,22 @@ void handleRequest(const std::string &request, const std::unordered_map<std::str
                 std::string id = params.at("id");
                 std::string sql = "DELETE FROM users WHERE id = " + id + ";";
                 sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
-                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\", \"code\":200}";
+                std::string response =
+                        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\", \"code\":200}";
                 send(clientSocket, response.c_str(), response.length(), 0);
             } else {
                 std::string response =
                         "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id' parameter\"]}";
                 send(clientSocket, response.c_str(), response.length(), 0);
             }
-        } else if (request.find("/roles") != std::string::npos) {
-            std::string body = request.substr(request.find("\r\n\r\n") + 4);
-            std::unordered_map<std::string, std::string> params;
-            parseFormData(body, params);
-            if (params.find("id") != params.end()) {
-                std::string id = params.at("id");
-                std::string sql = "DELETE FROM roles WHERE id = " + id + ";";
-                sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
-                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\", \"code\":200}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            } else {
-                std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id' parameter\"]}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            }
-        } else if (request.find("/permissions") != std::string::npos) {
-            std::string body = request.substr(request.find("\r\n\r\n") + 4);
-            std::unordered_map<std::string, std::string> params;
-            parseFormData(body, params);
-            if (params.find("id") != params.end()) {
-                std::string id = params.at("id");
-                std::string sql = "DELETE FROM permissions WHERE id = " + id + ";";
-                sqlite3_exec(db, sql.c_str(), nullptr, nullptr, nullptr);
-                std::string response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"OK\", \"code\":200}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            } else {
-                std::string response =
-                        "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Bad Request\", \"code\":400, \"errors\":[\"Missing 'id' parameter\"]}";
-                send(clientSocket, response.c_str(), response.length(), 0);
-            }
+        } else {
+            std::string response =
+                    "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Not Found\", \"code\":404}";
+            send(clientSocket, response.c_str(), response.length(), 0);
         }
     } else {
-        std::string response = "HTTP/1.1 405 Method Not Allowed\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Method Not Allowed\", \"code\":405}";
+        std::string response =
+                "HTTP/1.1 405 Method Not Allowed\r\nContent-Type: application/json\r\n\r\n{\"status\":\"Method Not Allowed\", \"code\":405}";
         send(clientSocket, response.c_str(), response.length(), 0);
     }
 
@@ -321,6 +186,6 @@ void startHttpServer(int port) {
 
 int main() {
     initializeDatabase();
-    startHttpServer(8080);
+    startHttpServer(6000);
     return 0;
 }
