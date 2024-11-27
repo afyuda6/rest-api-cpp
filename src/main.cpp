@@ -5,6 +5,7 @@
 #include <winsock2.h>
 #include <sqlite3.h>
 #include "database.h"
+#include "sqlite_wrapper.h"
 
 #pragma comment(lib, "ws2_32.lib")
 

@@ -1,4 +1,3 @@
-#include "sqlite_wrapper.h"
 #include <sqlite3.h>
 #include <iostream>
 
