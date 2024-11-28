@@ -11,7 +11,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Add source files
 add_executable(rest-api-cpp
         main.cpp
-        database/database.cpp
+        database/sqlite.cpp
         sqlite3.c
         handlers/user.cpp
         main.cpp
