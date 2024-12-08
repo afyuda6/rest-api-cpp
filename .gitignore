@@ -2,4 +2,4 @@ cmake-build-debug
 .idea
 include/sqlite3.h
 sqlite3.c
-CMakeLists.text
+CMakeLists.txt
