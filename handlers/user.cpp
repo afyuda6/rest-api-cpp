@@ -21,22 +21,19 @@ void parseFormData(const std::string &body, std::unordered_map<std::string, std:
 std::string trim(const std::string &str) {
     auto start = str.begin();
     while (start != str.end() && std::isspace(*start)) {
-        start++;
+        ++start;
     }
-
     auto end = str.end();
     while (end != start && std::isspace(*(end - 1))) {
-        end--;
+        --end;
     }
-
     return std::string(start, end);
 }
 
-void handleReadUsers(const std::string &request, sqlite3 *db, const SOCKET clientSocket) {
+void handleReadUsers(sqlite3 *db, const SOCKET clientSocket) {
     std::string query = "SELECT id, name FROM users;";
     sqlite3_stmt *stmt;
     sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
-
     std::ostringstream responseStream;
     responseStream <<
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\": \"OK\", \"code\": 200, \"data\": [";
@@ -46,12 +43,10 @@ void handleReadUsers(const std::string &request, sqlite3 *db, const SOCKET clien
             responseStream << ",";
         }
         first = false;
-        responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0)
-                << ", \"name\": \"" << sqlite3_column_text(stmt, 1) << "\"}";
+        responseStream << "{\"id\": " << sqlite3_column_int(stmt, 0) << ", \"name\": \"" << sqlite3_column_text(stmt, 1) << "\"}";
     }
     responseStream << "]}";
     sqlite3_finalize(stmt);
-
     std::string response = responseStream.str();
     send(clientSocket, response.c_str(), response.length(), 0);
 }
@@ -132,17 +127,7 @@ void handleDeleteUser(const std::string &request, sqlite3 *db, const SOCKET clie
 void userHandler(const std::string &request, const std::unordered_map<std::string, std::string> &params,
                  SOCKET clientSocket) {
     sqlite3 *db;
-    if (sqlite3_open("rest_api_cpp.db", &db)) {
-        std::cerr << "SQL error (open database): " << sqlite3_errmsg(db) << std::endl;
-    }
-
-    if (!db) {
-        std::string response =
-                "HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/json\r\n\r\n{\"status\": \"Internal Server Error\", \"code\": 500}";
-        send(clientSocket, response.c_str(), response.length(), 0);
-        return;
-    }
-
+    sqlite3_open("rest_api_cpp.db", &db);
     size_t usersPos = request.find("/users");
     if (usersPos != std::string::npos &&
         (usersPos + 6 == request.size() ||
@@ -151,7 +136,7 @@ void userHandler(const std::string &request, const std::unordered_map<std::strin
          (request[usersPos + 6] == '/' &&
           (usersPos + 7 == request.size() || request[usersPos + 7] == ' ')))) {
         if (request.find("GET") == 0) {
-            handleReadUsers(request, db, clientSocket);
+            handleReadUsers(db, clientSocket);
         } else if (request.find("POST") == 0) {
             handleCreateUser(request, db, clientSocket);
         } else if (request.find("PUT") == 0) {
@@ -168,6 +153,5 @@ void userHandler(const std::string &request, const std::unordered_map<std::strin
                 "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"status\": \"Not Found\", \"code\": 404}";
         send(clientSocket, response.c_str(), response.length(), 0);
     }
-
     sqlite3_close(db);
 }
