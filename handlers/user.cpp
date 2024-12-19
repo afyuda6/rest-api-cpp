@@ -3,7 +3,9 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
-#include <winsock2.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 void parseFormData(const std::string &body, std::unordered_map<std::string, std::string> &params) {
     std::istringstream bodyStream(body);
@@ -30,13 +32,12 @@ std::string trim(const std::string &str) {
     return std::string(start, end);
 }
 
-void handleReadUsers(sqlite3 *db, const SOCKET clientSocket) {
+void handleReadUsers(sqlite3 *db, const int clientSocket) {
     std::string query = "SELECT id, name FROM users;";
     sqlite3_stmt *stmt;
     sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
     std::ostringstream responseStream;
-    responseStream <<
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\": \"OK\", \"code\": 200, \"data\": [";
+    responseStream << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\": \"OK\", \"code\": 200, \"data\": [";
     bool first = true;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         if (!first) {
@@ -51,7 +52,7 @@ void handleReadUsers(sqlite3 *db, const SOCKET clientSocket) {
     send(clientSocket, response.c_str(), response.length(), 0);
 }
 
-void handleCreateUser(const std::string &request, sqlite3 *db, const SOCKET clientSocket) {
+void handleCreateUser(const std::string &request, sqlite3 *db, const int clientSocket) {
     std::string body = request.substr(request.find("\r\n\r\n") + 4);
     std::unordered_map<std::string, std::string> params;
     parseFormData(body, params);
@@ -75,7 +76,7 @@ void handleCreateUser(const std::string &request, sqlite3 *db, const SOCKET clie
     }
 }
 
-void handleUpdateUser(const std::string &request, sqlite3 *db, const SOCKET clientSocket) {
+void handleUpdateUser(const std::string &request, sqlite3 *db, const int clientSocket) {
     std::string body = request.substr(request.find("\r\n\r\n") + 4);
     std::unordered_map<std::string, std::string> params;
     parseFormData(body, params);
@@ -100,7 +101,7 @@ void handleUpdateUser(const std::string &request, sqlite3 *db, const SOCKET clie
     }
 }
 
-void handleDeleteUser(const std::string &request, sqlite3 *db, const SOCKET clientSocket) {
+void handleDeleteUser(const std::string &request, sqlite3 *db, const int clientSocket) {
     std::string body = request.substr(request.find("\r\n\r\n") + 4);
     std::unordered_map<std::string, std::string> params;
     parseFormData(body, params);
@@ -125,7 +126,7 @@ void handleDeleteUser(const std::string &request, sqlite3 *db, const SOCKET clie
 }
 
 void userHandler(const std::string &request, const std::unordered_map<std::string, std::string> &params,
-                 SOCKET clientSocket) {
+                 int clientSocket) {
     sqlite3 *db;
     sqlite3_open("rest_api_cpp.db", &db);
     size_t usersPos = request.find("/users");
