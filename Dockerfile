@@ -1,9 +1,7 @@
-FROM ubuntu:20.04
+FROM gcc:11.2.0
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    build-essential \
-    g++ \
     sqlite3 \
     libsqlite3-dev \
     cmake
