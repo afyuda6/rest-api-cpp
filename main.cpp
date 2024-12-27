@@ -18,7 +18,7 @@ int main() {
     int serverSocket, clientSocket;
     sockaddr_in server{}, client{};
     socklen_t clientLen;
-    char buffer[1024];
+    char buffer[8192];
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
         return 0;
