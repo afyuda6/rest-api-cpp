@@ -11,7 +11,7 @@ void initializeDatabase();
 void parseFormData(const std::string &body, std::unordered_map<std::string, std::string> &params);
 
 void userHandler(const std::string &request, const std::unordered_map<std::string, std::string> &params,
-                   int clientSocket);
+                 int clientSocket);
 
 int main() {
     initializeDatabase();
@@ -24,7 +24,7 @@ int main() {
         return 0;
     }
     int port = 6000;
-    const char* portEnv = std::getenv("PORT");
+    const char *portEnv = std::getenv("PORT");
     if (portEnv != nullptr) {
         port = std::atoi(portEnv);
     }
