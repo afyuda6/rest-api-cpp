@@ -1,0 +1,6 @@
+cmake-build-debug
+.idea
+include/sqlite3.h
+sqlite3.c
+CMakeLists.txt
+*.sh
